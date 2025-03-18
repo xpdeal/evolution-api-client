@@ -1,10 +1,10 @@
-import { test, expect, mock } from "bun:test";
+import { describe, expect, test } from 'bun:test';
 import axios from 'axios';
-import { Config } from '../src/config/config';
-import EvolutionAPI from '../src/evolution-api-client';
+import { Config } from '../src/config';
+import { EvolutionAPI } from '../src/evolution-api-client';
 import { InstanceOptions, MessageOptions, Settings } from '../src/types';
 
-test('EvolutionAPI', async () => {
+describe('EvolutionAPI', () => {
   let api: EvolutionAPI;
   let config: Config;
   let mockAxiosInstance: any;
@@ -13,16 +13,16 @@ test('EvolutionAPI', async () => {
   const setup = () => {
     // Create mock axios instance
     mockAxiosInstance = {
-      get: mock(() => Promise.resolve({ data: {} })),
-      post: mock(() => Promise.resolve({ data: {} })),
-      delete: mock(() => Promise.resolve({ data: {} })),
+      get: test.mock(() => Promise.resolve({ data: {} })),
+      post: test.mock(() => Promise.resolve({ data: {} })),
+      delete: test.mock(() => Promise.resolve({ data: {} })),
       defaults: {
         headers: {}
       }
     };
 
     // Mock axios.create to return our mock instance
-    mock(axios, 'create', () => mockAxiosInstance);
+    test.mock(axios, 'create', () => mockAxiosInstance);
 
     config = new Config('https://test-api.com', 'test-key');
     api = new EvolutionAPI(config);
@@ -108,16 +108,12 @@ test('EvolutionAPI', async () => {
     setup();
 
     const settings: Settings = {
-      rejectCall: true,
-      msgCall: 'Sorry, calls are not accepted',
-      groupsIgnore: false,
-      alwaysOnline: true
-    };
-
-    const defaultSettings = {
-      readMessages: false,
-      readStatus: false,
-      syncFullHistory: false
+      reject_call: true,
+      msg_call: 'Sorry, calls are not accepted',
+      groups_ignore: false,
+      always_online: true,
+      read_messages: false,
+      read_status: false
     };
 
     const mockResponse = {
@@ -133,7 +129,7 @@ test('EvolutionAPI', async () => {
     expect(result).toEqual(mockResponse.data);
     expect(mockAxiosInstance.post).toHaveBeenCalledWith(
       '/settings/set/test-instance',
-      { ...settings, ...defaultSettings }
+      settings
     );
   });
 });

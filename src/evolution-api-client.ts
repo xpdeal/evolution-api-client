@@ -10,13 +10,21 @@ import {
   GroupResponse,
   InviteCodeResponse
 } from './types';
+import { GroupService } from './services/group-service';
+import { SettingsService } from './services/settings-service';
+import { MessageService } from './services/message-service';
+import { ChatService } from './services/chat-service';
 
-export default class EvolutionAPI {
-  private baseUrl: string;
-  private globalApikey: string;
-  private instance: string | null;
+export class EvolutionAPI {
+  protected baseUrl: string;
+  protected globalApikey: string;
+  protected instance: string | null;
   private apikey: string | null;
   private axiosInstance: AxiosInstance;
+  readonly group: GroupService;
+  readonly settings: SettingsService;
+  readonly message: MessageService;
+  readonly chat: ChatService;
 
   constructor(private config: IConfig) {
     this.baseUrl = config.getUrl();
@@ -31,6 +39,11 @@ export default class EvolutionAPI {
         'apikey': this.globalApikey
       }
     });
+
+    this.group = new GroupService(config);
+    this.settings = new SettingsService(config);
+    this.message = new MessageService(config);
+    this.chat = new ChatService(config);
   }
 
   setInstance(instance: string): this {
@@ -49,9 +62,9 @@ export default class EvolutionAPI {
     return this;
   }
 
-  private _handleError(error: unknown): never {
+  protected handleError(error: unknown): never {
     // Check if it's an Axios error (both real and mocked)
-    if (error && typeof error === 'object' && 'isAxiosError' in error) {
+    if (axios.isAxiosError(error)) {
       const axiosError = error as AxiosError;
       if (axiosError.response?.data) {
         throw new Error(`Error ${axiosError.response.status}: ${JSON.stringify(axiosError.response.data)}`);
@@ -83,7 +96,7 @@ export default class EvolutionAPI {
 
       return response.data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -95,7 +108,7 @@ export default class EvolutionAPI {
       }
       return (await this.axiosInstance.get(url)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -107,7 +120,7 @@ export default class EvolutionAPI {
       }
       return (await this.axiosInstance.get(url)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -115,7 +128,7 @@ export default class EvolutionAPI {
     try {
       return (await this.axiosInstance.post(`/instance/restart/${this.instance}`)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -123,7 +136,7 @@ export default class EvolutionAPI {
     try {
       return (await this.axiosInstance.post(`/instance/setPresence/${this.instance}`, { presence })).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -131,7 +144,7 @@ export default class EvolutionAPI {
     try {
       return (await this.axiosInstance.get(`/instance/connectionState/${this.instance}`)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -139,7 +152,7 @@ export default class EvolutionAPI {
     try {
       return (await this.axiosInstance.delete(`/instance/logout/${this.instance}`)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -147,7 +160,7 @@ export default class EvolutionAPI {
     try {
       return (await this.useGlobalApikey().axiosInstance.delete(`/instance/delete/${this.instance}`)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -170,7 +183,7 @@ export default class EvolutionAPI {
         { ...defaultConfig, ...webhookConfig }
       )).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -178,28 +191,29 @@ export default class EvolutionAPI {
     try {
       return (await this.axiosInstance.get(`/webhook/find/${this.instance}`)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
-  async setSettings(settings: Settings = {}): Promise<any> {
+  async setSettings(settings: Partial<Settings>): Promise<any> {
     try {
       const defaultSettings: Settings = {
-        rejectCall: true,
-        msgCall: "I do not accept calls",
-        groupsIgnore: false,
-        alwaysOnline: true,
-        readMessages: false,
-        syncFullHistory: false,
-        readStatus: false
+        reject_call: true,
+        msg_call: "I do not accept calls",
+        groups_ignore: false,
+        always_online: true,
+        read_messages: false,
+        read_status: false
       };
 
-      return (await this.axiosInstance.post(
+      const mergedSettings = { ...defaultSettings, ...settings };
+      const response = await this.axiosInstance.post(
         `/settings/set/${this.instance}`,
-        { ...defaultSettings, ...settings }
-      )).data;
+        mergedSettings
+      );
+      return response.data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -207,7 +221,7 @@ export default class EvolutionAPI {
     try {
       return (await this.axiosInstance.get(`/settings/find/${this.instance}`)).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -218,7 +232,7 @@ export default class EvolutionAPI {
         { number, text, ...options }
       )).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -229,7 +243,7 @@ export default class EvolutionAPI {
         config
       )).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -240,7 +254,7 @@ export default class EvolutionAPI {
         { groupJid, description }
       )).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 
@@ -250,7 +264,7 @@ export default class EvolutionAPI {
         `/group/inviteCode/${this.instance}?id=${groupJid}`
       )).data;
     } catch (error) {
-      this._handleError(error);
+      this.handleError(error);
     }
   }
 }
