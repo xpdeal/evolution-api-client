@@ -1,6 +1,6 @@
 # Evolution API Client
 
-A Node.js client library for interacting with the Evolution API WhatsApp integration.
+A TypeScript/Node.js client library for interacting with the Evolution API WhatsApp integration.
 
 ## Installation
 
@@ -10,11 +10,15 @@ npm install evolution-api-client
 
 ## Usage
 
-```javascript
-const EvolutionAPI = require('evolution-api-client');
+```typescript
+import { Config } from 'evolution-api-client/config';
+import EvolutionAPI from 'evolution-api-client';
 
-// Initialize with base URL and API key
-const api = new EvolutionAPI('https://your-evolution-api.com', 'your-global-api-key');
+// Initialize config with base URL and API key
+const config = new Config('https://your-evolution-api.com', 'your-global-api-key');
+
+// Initialize client with config
+const api = new EvolutionAPI(config);
 
 // Set the instance name you want to work with
 api.setInstance('my-instance');
@@ -27,10 +31,6 @@ async function createNewInstance() {
       qrcode: true
     });
     console.log('Instance created:', result);
-    
-    // Store the API key for future use
-    console.log('API Key:', api.apikey);
-    
     return result;
   } catch (error) {
     console.error('Error creating instance:', error);
@@ -72,13 +72,25 @@ This client provides methods to interact with all major functionality of the Evo
 
 ## Example: Sending a Message
 
-```javascript
+```typescript
+import { Config } from 'evolution-api-client/config';
+import EvolutionAPI from 'evolution-api-client';
+import { MessageOptions } from 'evolution-api-client/types';
+
 async function sendTextMessage() {
   try {
+    const config = new Config('https://your-evolution-api.com', 'your-global-api-key');
+    const api = new EvolutionAPI(config);
+    
+    const options: MessageOptions = {
+      delay: 1000,
+      presence: 'composing'
+    };
+    
     const result = await api
       .setInstance('my-instance')
       .setApikey('instance-specific-api-key') // If you have a stored API key
-      .sendText('5511987654321', 'Hello from Evolution API Client!');
+      .sendText('5511987654321', 'Hello from Evolution API Client!', options);
     
     console.log('Message sent:', result);
   } catch (error) {
@@ -89,9 +101,15 @@ async function sendTextMessage() {
 
 ## Example: Working with Groups
 
-```javascript
+```typescript
+import { Config } from 'evolution-api-client/config';
+import EvolutionAPI from 'evolution-api-client';
+
 async function createAndManageGroup() {
   try {
+    const config = new Config('https://your-evolution-api.com', 'your-global-api-key');
+    const api = new EvolutionAPI(config);
+    
     // Create a new group
     const group = await api.createGroup({
       subject: "My Test Group",
@@ -119,59 +137,93 @@ async function createAndManageGroup() {
 
 ### Constructor
 
-```javascript
-const api = new EvolutionAPI(baseUrl, globalApikey);
+```typescript
+import { Config } from 'evolution-api-client/config';
+import EvolutionAPI from 'evolution-api-client';
+
+const config = new Config(baseUrl: string, apiKey: string);
+const api = new EvolutionAPI(config);
 ```
+
+### Configuration
+
+The `Config` class provides methods to manage your API configuration:
+
+- `getUrl()` - Get the current base URL
+- `getApiKey()` - Get the current API key
+- `setUrl(url: string)` - Update the base URL
+- `setApiKey(apiKey: string)` - Update the API key
 
 ### Instance Methods
 
-- `setInstance(instance)` - Set the instance name
-- `setApikey(apikey)` - Set the instance-specific API key
+- `setInstance(instance: string)` - Set the instance name
+- `setApikey(apikey: string)` - Set the instance-specific API key
 - `useGlobalApikey()` - Switch back to using the global API key
 
 ### Instance Management
 
-- `createInstance(options)`
-- `fetchInstances(instanceName)`
-- `connectInstance(number)`
+- `createInstance(options: InstanceOptions)`
+- `fetchInstances(instanceName?: string)`
+- `connectInstance(number?: string)`
 - `restartInstance()`
-- `setPresence(presence)`
+- `setPresence(presence: PresenceStatus)`
 - `getConnectionState()`
 - `logoutInstance()`
 - `deleteInstance()`
 
 ### Messaging
 
-- `sendText(number, text, options)`
-- `sendMedia(number, mediaConfig)`
-- `sendButtons(number, buttonsConfig)`
-- `sendList(number, listConfig)`
+- `sendText(number: string, text: string, options?: MessageOptions)`
+- `sendMedia(number: string, mediaConfig: MediaConfig)`
+- `sendButtons(number: string, buttonsConfig: ButtonsConfig)`
+- `sendList(number: string, listConfig: ListConfig)`
 
 ### Group Management
 
-- `createGroup(groupConfig)`
-- `updateGroupSubject(groupJid, subject)`
-- `updateGroupDescription(groupJid, description)`
-- `fetchInviteCode(groupJid)`
-- `revokeInviteCode(groupJid)`
+- `createGroup(groupConfig: GroupConfig)`
+- `updateGroupSubject(groupJid: string, subject: string)`
+- `updateGroupDescription(groupJid: string, description: string)`
+- `fetchInviteCode(groupJid: string)`
+- `revokeInviteCode(groupJid: string)`
 
 ### Chat Management
 
-- `isWhatsAppNumber(numbers)`
-- `findContacts(where)`
-- `findMessages(where)`
+- `isWhatsAppNumber(numbers: string[])`
+- `findContacts(where: ContactQuery)`
+- `findMessages(where: MessageQuery)`
 - `findChats()`
-- `fetchProfilePicture(number)`
+- `fetchProfilePicture(number: string)`
 
 ### Integrations
 
-- `createTypebot(typebotConfig)`
+- `createTypebot(typebotConfig: TypebotConfig)`
 - `findTypebots()`
-- `fetchTypebot(typebotId)`
-- `startTypebot(typebotConfig)`
-- `createOpenaiBot(openaiConfig)`
-- `setOpenaiCreds(credsConfig)`
+- `fetchTypebot(typebotId: string)`
+- `startTypebot(typebotConfig: TypebotConfig)`
+- `createOpenaiBot(openaiConfig: OpenAIConfig)`
+- `setOpenaiCreds(credsConfig: OpenAICredsConfig)`
+
+## Types
+
+The library includes TypeScript type definitions for all parameters and responses. Import them from the types module:
+
+```typescript
+import {
+  InstanceOptions,
+  MessageOptions,
+  MediaConfig,
+  ButtonsConfig,
+  ListConfig,
+  GroupConfig,
+  ContactQuery,
+  MessageQuery,
+  TypebotConfig,
+  OpenAIConfig,
+  OpenAICredsConfig,
+  PresenceStatus
+} from 'evolution-api-client/types';
+```
 
 ## License
 
-MIT# evolution-api-client
+MIT
