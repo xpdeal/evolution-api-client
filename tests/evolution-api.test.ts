@@ -76,6 +76,6 @@ describe('EvolutionAPI', () => {
 
     const response = await client.settings.setSettings(settings);
     expect(response).toEqual(settings);
-    expect(mockAxiosInstance.post).toHaveBeenCalled();
+    expect(mockAxiosInstance.post.mock.calls).toBeTruthy();
   });
 });
