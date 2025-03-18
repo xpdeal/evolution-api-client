@@ -1,16 +1,17 @@
 import { EvolutionAPI } from '../evolution-api-client';
 import { IConfig, ChatResponse, MessageHistoryResponse } from '../types';
 import axios from 'axios';
+import { BaseService } from './base-service';
 
-export class ChatService extends EvolutionAPI {
+export class ChatService extends BaseService {
   constructor(config: IConfig) {
     super(config);
   }
 
   async findChat(chatId: string): Promise<ChatResponse> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/chat/findChat/${this.instance}?id=${chatId}`,
+      const response = await this.axiosInstance.get(
+        `/chat/findChat/${this.instance}?id=${chatId}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -26,8 +27,8 @@ export class ChatService extends EvolutionAPI {
 
   async fetchAllChats(): Promise<ChatResponse[]> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/chat/fetchAllChats/${this.instance}`,
+      const response = await this.axiosInstance.get(
+        `/chat/fetchAllChats/${this.instance}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -43,8 +44,8 @@ export class ChatService extends EvolutionAPI {
 
   async fetchPrivateChats(): Promise<ChatResponse[]> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/chat/fetchPrivateChats/${this.instance}`,
+      const response = await this.axiosInstance.get(
+        `/chat/fetchPrivateChats/${this.instance}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -60,8 +61,8 @@ export class ChatService extends EvolutionAPI {
 
   async fetchGroupChats(): Promise<ChatResponse[]> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/chat/fetchGroupChats/${this.instance}`,
+      const response = await this.axiosInstance.get(
+        `/chat/fetchGroupChats/${this.instance}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -77,8 +78,8 @@ export class ChatService extends EvolutionAPI {
 
   async fetchMessages(chatId: string, count?: number): Promise<MessageHistoryResponse> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/chat/fetchMessages/${this.instance}`,
+      const response = await this.axiosInstance.get(
+        `/chat/fetchMessages/${this.instance}`,
         {
           params: {
             id: chatId,
@@ -96,17 +97,39 @@ export class ChatService extends EvolutionAPI {
     }
   }
 
-  async markMessageAsRead(messageId: string): Promise<void> {
+  async getChats(): Promise<ChatResponse[]> {
     try {
-      await axios.post(
-        `${this.baseUrl}/chat/markMessageAsRead/${this.instance}`,
-        { messageId },
+      const response = await this.axiosInstance.get(
+        `/chat/get/${this.instance}`
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async getMessageHistory(chatId: string, includeMe: boolean = true): Promise<MessageHistoryResponse> {
+    try {
+      const response = await this.axiosInstance.get(
+        `/chat/messages/${this.instance}`,
         {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
+          params: {
+            chatId,
+            includeMe
           }
         }
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async markMessageAsRead(messageId: string): Promise<void> {
+    try {
+      await this.axiosInstance.post(
+        `/chat/markMessageAsRead/${this.instance}`,
+        { messageId }
       );
     } catch (error) {
       throw this.handleError(error);
@@ -115,15 +138,9 @@ export class ChatService extends EvolutionAPI {
 
   async archiveChat(chatId: string): Promise<void> {
     try {
-      await axios.post(
-        `${this.baseUrl}/chat/archiveChat/${this.instance}`,
-        { chatId },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      await this.axiosInstance.post(
+        `/chat/archive/${this.instance}`,
+        { chatId }
       );
     } catch (error) {
       throw this.handleError(error);
@@ -132,15 +149,9 @@ export class ChatService extends EvolutionAPI {
 
   async unarchiveChat(chatId: string): Promise<void> {
     try {
-      await axios.post(
-        `${this.baseUrl}/chat/unarchiveChat/${this.instance}`,
-        { chatId },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      await this.axiosInstance.post(
+        `/chat/unarchive/${this.instance}`,
+        { chatId }
       );
     } catch (error) {
       throw this.handleError(error);
@@ -149,31 +160,10 @@ export class ChatService extends EvolutionAPI {
 
   async deleteChat(chatId: string): Promise<void> {
     try {
-      await axios.delete(
-        `${this.baseUrl}/chat/deleteChat/${this.instance}`,
+      await this.axiosInstance.delete(
+        `/chat/delete/${this.instance}`,
         {
-          data: { chatId },
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
-      );
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async deleteMessage(messageId: string): Promise<void> {
-    try {
-      await axios.delete(
-        `${this.baseUrl}/chat/deleteMessage/${this.instance}`,
-        {
-          data: { messageId },
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
+          data: { chatId }
         }
       );
     } catch (error) {
@@ -183,15 +173,9 @@ export class ChatService extends EvolutionAPI {
 
   async clearChat(chatId: string): Promise<void> {
     try {
-      await axios.post(
-        `${this.baseUrl}/chat/clearChat/${this.instance}`,
-        { chatId },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      await this.axiosInstance.post(
+        `/chat/clear/${this.instance}`,
+        { chatId }
       );
     } catch (error) {
       throw this.handleError(error);

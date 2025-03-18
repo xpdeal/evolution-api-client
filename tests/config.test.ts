@@ -1,31 +1,32 @@
+import { expect, describe, test } from "bun:test";
 import { Config } from '../src/config/config';
 
 describe('Config', () => {
-  let config: Config;
-
-  beforeEach(() => {
-    config = new Config('https://test-api.com', 'test-api-key');
+  test('URL management > should get initial URL', () => {
+    const url = 'http://localhost:8080';
+    const config = new Config(url, 'test-key');
+    expect(config.getUrl()).toBe(url);
   });
 
-  describe('URL management', () => {
-    test('should get initial URL', () => {
-      expect(config.getUrl()).toBe('https://test-api.com');
-    });
-
-    test('should set new URL', () => {
-      config.setUrl('https://new-api.com');
-      expect(config.getUrl()).toBe('https://new-api.com');
-    });
+  test('URL management > should set new URL', () => {
+    const initialUrl = 'http://localhost:8080';
+    const newUrl = 'http://localhost:3000';
+    const config = new Config(initialUrl, 'test-key');
+    config.setUrl(newUrl);
+    expect(config.getUrl()).toBe(newUrl);
   });
 
-  describe('API key management', () => {
-    test('should get initial API key', () => {
-      expect(config.getApiKey()).toBe('test-api-key');
-    });
+  test('API key management > should get initial API key', () => {
+    const apiKey = 'test-key';
+    const config = new Config('http://localhost:8080', apiKey);
+    expect(config.getApiKey()).toBe(apiKey);
+  });
 
-    test('should set new API key', () => {
-      config.setApiKey('new-api-key');
-      expect(config.getApiKey()).toBe('new-api-key');
-    });
+  test('API key management > should set new API key', () => {
+    const initialKey = 'test-key';
+    const newKey = 'new-test-key';
+    const config = new Config('http://localhost:8080', initialKey);
+    config.setApiKey(newKey);
+    expect(config.getApiKey()).toBe(newKey);
   });
 });
