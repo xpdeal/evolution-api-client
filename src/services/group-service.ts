@@ -1,23 +1,17 @@
-import { EvolutionAPI } from '../evolution-api-client';
 import { GroupConfig, GroupResponse, InviteCodeResponse, IConfig } from '../types';
+import { BaseService } from './base-service';
 import axios from 'axios';
 
-export class GroupService extends EvolutionAPI {
+export class GroupService extends BaseService {
   constructor(config: IConfig) {
     super(config);
   }
 
   async createGroup(config: GroupConfig): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/create/${this.instance}`,
-        config,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/create/${this.instance}`,
+        config
       );
       return response.data;
     } catch (error) {
@@ -27,15 +21,9 @@ export class GroupService extends EvolutionAPI {
 
   async updateGroupPicture(groupJid: string, image: string): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/updateGroupPicture/${this.instance}`,
-        { groupJid, image },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/updateGroupPicture/${this.instance}`,
+        { groupJid, image }
       );
       return response.data;
     } catch (error) {
@@ -45,15 +33,9 @@ export class GroupService extends EvolutionAPI {
 
   async updateGroupSubject(groupJid: string, subject: string): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/updateGroupSubject/${this.instance}`,
-        { groupJid, subject },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/updateGroupSubject/${this.instance}`,
+        { groupJid, subject }
       );
       return response.data;
     } catch (error) {
@@ -61,17 +43,11 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async updateGroupDescription(groupJid: string, description: string): Promise<GroupResponse> {
+  async updateGroupDescription(groupId: string, description: string): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/updateGroupDescription/${this.instance}`,
-        { groupJid, description },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/desc/${this.instance}`,
+        { groupId, description }
       );
       return response.data;
     } catch (error) {
@@ -79,17 +55,11 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async addParticipants(groupJid: string, participants: string[]): Promise<GroupResponse> {
+  async addParticipants(groupId: string, participants: string[]): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/addParticipants/${this.instance}`,
-        { groupJid, participants },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/add/${this.instance}`,
+        { groupId, participants }
       );
       return response.data;
     } catch (error) {
@@ -97,17 +67,11 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async removeParticipants(groupJid: string, participants: string[]): Promise<GroupResponse> {
+  async removeParticipants(groupId: string, participants: string[]): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/removeParticipants/${this.instance}`,
-        { groupJid, participants },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/remove/${this.instance}`,
+        { groupId, participants }
       );
       return response.data;
     } catch (error) {
@@ -115,17 +79,11 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async promoteParticipants(groupJid: string, participants: string[]): Promise<GroupResponse> {
+  async promoteParticipants(groupId: string, participants: string[]): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/promoteParticipants/${this.instance}`,
-        { groupJid, participants },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/promote/${this.instance}`,
+        { groupId, participants }
       );
       return response.data;
     } catch (error) {
@@ -133,17 +91,11 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async demoteParticipants(groupJid: string, participants: string[]): Promise<GroupResponse> {
+  async demoteParticipants(groupId: string, participants: string[]): Promise<GroupResponse> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/group/demoteParticipants/${this.instance}`,
-        { groupJid, participants },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.post(
+        `/group/demote/${this.instance}`,
+        { groupId, participants }
       );
       return response.data;
     } catch (error) {
@@ -151,16 +103,10 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async getInviteCode(groupJid: string): Promise<InviteCodeResponse> {
+  async fetchInviteCode(groupId: string): Promise<InviteCodeResponse> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/group/getInviteCode/${this.instance}?id=${groupJid}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.get(
+        `/group/invitecode/${this.instance}/${groupId}`
       );
       return response.data;
     } catch (error) {
@@ -168,17 +114,22 @@ export class GroupService extends EvolutionAPI {
     }
   }
 
-  async revokeInviteCode(groupJid: string): Promise<InviteCodeResponse> {
+  async revokeInviteCode(groupId: string): Promise<InviteCodeResponse> {
     try {
-      const response = await axios.put(
-        `${this.baseUrl}/group/revokeInviteCode/${this.instance}`,
-        { groupJid },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.delete(
+        `/group/invitecode/${this.instance}/${groupId}`
+      );
+      return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async leaveGroup(groupId: string): Promise<GroupResponse> {
+    try {
+      const response = await this.axiosInstance.post(
+        `/group/leave/${this.instance}`,
+        { groupId }
       );
       return response.data;
     } catch (error) {
@@ -188,32 +139,8 @@ export class GroupService extends EvolutionAPI {
 
   async getInfo(groupJid: string): Promise<GroupResponse> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/group/getInfo/${this.instance}?id=${groupJid}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
-      );
-      return response.data;
-    } catch (error) {
-      throw this.handleError(error);
-    }
-  }
-
-  async leaveGroup(groupJid: string): Promise<GroupResponse> {
-    try {
-      const response = await axios.delete(
-        `${this.baseUrl}/group/leaveGroup/${this.instance}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          },
-          data: { groupJid }
-        }
+      const response = await this.axiosInstance.get(
+        `/group/getInfo/${this.instance}?id=${groupJid}`
       );
       return response.data;
     } catch (error) {

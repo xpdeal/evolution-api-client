@@ -1,22 +1,26 @@
-import { EvolutionAPI } from '../evolution-api-client';
 import { IConfig, Settings, PresenceStatus } from '../types';
-import axios from 'axios';
+import { BaseService } from './base-service';
 
-export class SettingsService extends EvolutionAPI {
+export class SettingsService extends BaseService {
   constructor(config: IConfig) {
     super(config);
   }
 
-  async findSettings(): Promise<Settings> {
+  async setSettings(settings: Partial<Settings>): Promise<Settings> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/settings/find/${this.instance}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const defaultSettings: Settings = {
+        reject_call: true,
+        msg_call: "I do not accept calls",
+        groups_ignore: false,
+        always_online: true,
+        read_messages: false,
+        read_status: false
+      };
+
+      const mergedSettings = { ...defaultSettings, ...settings };
+      const response = await this.axiosInstance.post(
+        `/settings/set/${this.instance}`,
+        mergedSettings
       );
       return response.data;
     } catch (error) {
@@ -24,17 +28,10 @@ export class SettingsService extends EvolutionAPI {
     }
   }
 
-  async updateSettings(settings: Settings): Promise<Settings> {
+  async getSettings(): Promise<Settings> {
     try {
-      const response = await axios.post(
-        `${this.baseUrl}/settings/update/${this.instance}`,
-        settings,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.get(
+        `/settings/get/${this.instance}`
       );
       return response.data;
     } catch (error) {
@@ -44,14 +41,8 @@ export class SettingsService extends EvolutionAPI {
 
   async getQrcode(): Promise<string> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/settings/qrcode/${this.instance}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.get(
+        `/settings/qrcode/${this.instance}`
       );
       return response.data;
     } catch (error) {
@@ -61,15 +52,8 @@ export class SettingsService extends EvolutionAPI {
 
   async restart(): Promise<void> {
     try {
-      await axios.post(
-        `${this.baseUrl}/settings/restart/${this.instance}`,
-        {},
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      await this.axiosInstance.post(
+        `/settings/restart/${this.instance}`
       );
     } catch (error) {
       throw this.handleError(error);
@@ -78,14 +62,8 @@ export class SettingsService extends EvolutionAPI {
 
   async logout(): Promise<void> {
     try {
-      await axios.delete(
-        `${this.baseUrl}/settings/logout/${this.instance}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      await this.axiosInstance.delete(
+        `/settings/logout/${this.instance}`
       );
     } catch (error) {
       throw this.handleError(error);
@@ -94,15 +72,9 @@ export class SettingsService extends EvolutionAPI {
 
   async setPresence(presence: PresenceStatus): Promise<void> {
     try {
-      await axios.post(
-        `${this.baseUrl}/settings/setPresence/${this.instance}`,
-        { presence },
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      await this.axiosInstance.post(
+        `/settings/presence/${this.instance}`,
+        { presence }
       );
     } catch (error) {
       throw this.handleError(error);
@@ -111,16 +83,43 @@ export class SettingsService extends EvolutionAPI {
 
   async getConnectionState(): Promise<string> {
     try {
-      const response = await axios.get(
-        `${this.baseUrl}/settings/connectionState/${this.instance}`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': this.globalApikey
-          }
-        }
+      const response = await this.axiosInstance.get(
+        `/settings/connection-state/${this.instance}`
       );
       return response.data;
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async setProfilePicture(image: string): Promise<void> {
+    try {
+      await this.axiosInstance.post(
+        `/settings/profile/picture/${this.instance}`,
+        { image }
+      );
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async setProfileName(name: string): Promise<void> {
+    try {
+      await this.axiosInstance.post(
+        `/settings/profile/name/${this.instance}`,
+        { name }
+      );
+    } catch (error) {
+      throw this.handleError(error);
+    }
+  }
+
+  async setProfileStatus(status: string): Promise<void> {
+    try {
+      await this.axiosInstance.post(
+        `/settings/profile/status/${this.instance}`,
+        { status }
+      );
     } catch (error) {
       throw this.handleError(error);
     }
